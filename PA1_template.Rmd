@@ -1,25 +1,89 @@
+
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
+title: "Reproductible Research Course - Project 1"
+date: "Wednesday, July 15, 2015"
+output:
   html_document:
     keep_md: true
 ---
 
+This project answers questions from Peer Assessment asignment #1, of the reproductible Research course on Coursera.
+
+
+<hr>
 
 ## Loading and preprocessing the data
 
+<hr>
+#### Load the data (i.e. read.csv()) and process/transform the data (if necessary) into a format suitable for your analysis
 
+The code below will load all of the libraries required by this project, handle some global formatting issues and finally load the dataset.
+
+```{r, message=FALSE}
+
+## Setting up the library and folder used in the assignment
+library(dplyr)
+library(ggplot2)
+library(xtable)
+setwd("C:/Users/jfrue_000.MAISON/R/Course5/RepData_PeerAssessment1")
+# setwd("~/R")
+
+## numbers >= 10^5 will be denoted in scientific notation and rounded to 2 digits
+options(scipen = 1, digits = 2)
+
+## Reads the file in data frames that can be used by dplyr
+activities <- tbl_df(read.csv("activity.csv"))
+```
+
+<hr>
 
 ## What is mean total number of steps taken per day?
 
+<hr>
+For this part of the assignment, you can ignore the missing values in the dataset.
 
+#### Calculate the total number of steps taken per day
+
+```{r, results='asis'}
+# Creates the summary by date, and filters out the "NA"s
+SPD <- summarise(group_by(filter(activities,steps != "NA"),date),Total_Steps=sum(steps))
+
+#Use the xtable library to create an html table with all the results
+print(xtable(SPD, caption="<b>Total</b> number of steps taken per day"), type="html", caption.placement="top")
+```
+<br><br>
+
+#### Make a histogram of the total number of steps taken each day
+
+```{r}
+ggplot(SPD, aes(x=Total_Steps)) +
+  geom_histogram(fill = "blue", colour="pink", binwidth=2500) +
+  labs(title="Histogram of number of days by range of steps taken\n",
+       x = "\nTotal number of steps taken in a given day", y = "Frequency of days\nfor each steps range") +
+  theme_bw()
+
+```
+
+#### Calculate and report the mean and median of the total number of steps taken per day
+
+```{r}
+# creates the mean and median variables to be
+# inserted in text using the `R [...]` function
+mean_SPD <- mean(SPD$Total_Steps)
+Median_SPD <- median(SPD$Total_Steps)
+
+
+```
+
+The <b>mean</b> of the total number of steps per day is <b>`r mean_SPD`</b>
+
+The <b>median</b> of the total number of steps per day is <b>`r Median_SPD`</b>
+
+<hr>
 
 ## What is the average daily activity pattern?
 
+<hr>
 
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+- Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+- Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?

@@ -1,0 +1,30 @@
+---
+title: "Project 1"
+author: "JF Ruel"
+date: "Tuesday, July 14, 2015"
+output: html_document
+---
+
+##
+
+```{r, message=FALSE}
+library(dplyr)
+```
+
+
+```{r, results='asis'}
+library(xtable)
+activities <- tbl_df(read.csv("activity.csv"))
+xt <- xtable(summarise(group_by(filter(activities,steps != "NA"),date),sum(steps), median(steps), mean(steps)))
+print(xt, type = "html")
+```
+
+
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
