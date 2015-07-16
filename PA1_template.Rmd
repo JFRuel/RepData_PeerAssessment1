@@ -20,13 +20,13 @@ This project answers questions from Peer Assessment asignment #1, of the reprodu
 The code below will load all of the libraries required by this project, handle some global formatting issues and finally load the dataset.
 
 ```{r, message=FALSE}
+## Setting the working directory
+setwd("C:/Users/jfrue_000.MAISON/R/Course5/RepData_PeerAssessment1")
 
 ## Setting up the library and folder used in the assignment
 library(dplyr)
 library(ggplot2)
 library(xtable)
-setwd("C:/Users/jfrue_000.MAISON/R/Course5/RepData_PeerAssessment1")
-# setwd("~/R")
 
 ## numbers >= 10^5 will be denoted in scientific notation and rounded to 2 digits
 options(scipen = 1, digits = 2)
@@ -85,5 +85,185 @@ The <b>median</b> of the total number of steps per day is <b>`r Median_SPD`</b>
 
 <hr>
 
-- Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-- Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+#### Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+After consulting the forum discussions, I interpret this question as asking to do the average of number of steps, accross all days, of each of the individual intervals. 
+
+```{r}
+
+
+MbI <- summarise(group_by(filter(activities,steps != "NA"),interval),Mean_Steps=mean(steps))
+
+ggplot(data=MbI, aes(x=interval, y=Mean_Steps, group=1)) +
+  geom_line() +
+labs(title="Average steps taken by time intervals\n",
+     x = "\nTime intervals", y = "Average steps taken\nfor all days") +
+  theme_bw()
+
+
+```
+
+
+
+
+
+#### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r}
+Max_int <- filter(MbI, Mean_Steps == max(MbI$Mean_Steps))
+
+```
+
+The interval with the highest average number of steps is interval number: <b>`r Max_int[1,1]`</b>
+
+<hr>
+
+# Imputing missing values
+
+<hr>
+
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
+
+#### Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r}
+NA_data <- count(filter(activities, is.na(steps)))
+
+```
+
+The number of rows with NA values in the activities dataset is: <b>`r NA_data`</b>
+
+<hr>
+
+#### Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+#### Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+
+# Merges intervals averages from MbI dataset (done earlier) to activities data
+  Imputed_data <- merge(y = activities, x = MbI, by = "interval", all = TRUE)
+
+# Reorder the dataset by date/interval
+  Imputed_data <- Imputed_data[with(Imputed_data, order(date, interval)), ]
+
+# Impute averate where steps = NA
+  Imputed_data <- mutate(Imputed_data, steps = round(ifelse(is.na(steps),Mean_Steps,steps)),0)
+
+# Drops unwanted columns
+  Imputed_data <- select(Imputed_data,steps, date, interval)
+
+
+```
+
+<hr>
+
+#### Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.
+
+Calculate the total number of steps taken per day
+
+```{r, results='asis'}
+SPD_2 <- summarise(group_by(Imputed_data,date),Total_Steps=sum(steps))
+```
+<br><br>
+
+Make a histogram of the total number of steps taken each day
+
+```{r}
+ggplot(SPD_2, aes(x=Total_Steps)) +
+  geom_histogram(fill = "blue", colour="pink", binwidth=2500) +
+  labs(title="Histogram of number of days by range of steps taken\n",
+       x = "\nTotal number of steps taken in a given day", y = "Frequency of days\nfor each steps range") +
+  theme_bw()
+
+```
+
+Calculate and report the mean and median of the total number of steps taken per day
+
+```{r}
+# creates the mean and median variables to be
+# inserted in text using the `R [...]` function
+mean_SPD_2 <- mean(SPD_2$Total_Steps)
+Median_SPD_2 <- median(SPD_2$Total_Steps)
+
+```
+
+The <b>mean</b> of the total number of steps per day with imputed values is <b>`r mean_SPD_2`</b>
+
+The <b>median</b> of the total number of steps per day with imputed values is <b>`r Median_SPD_2`</b>
+
+<hr>
+
+#### Do these values differ from the estimates from the first part of the assignment?
+
+The values differ slightly, with results from "imputed" dataset showing lower values.
+
+The <b>mean</b> of the total number of steps:
+
+- With imputed data:           <b>`r mean_SPD_2`</b>
+- With missing values ignored: <b>`r mean_SPD`</b>
+
+The <b>median</b> of the total number of steps:
+
+- With imputed data:           <b>`r Median_SPD_2`</b>
+- With missing values ignored: <b>`r Median_SPD`</b>
+
+<hr>
+
+#### What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+The Facet plot below shows that the impact is an increase of the number of days with the average number of steps, with little changes otherwise. 
+
+This is the expected result, given that I imputed the average number of steps to missing values.
+
+
+```{r}
+
+# Creates a combined dataset with Ignored and Imputed value
+# adding a column named "data" which allows to segregate between
+# the two and allow for creating a facet grid in ggplot
+SPD_Combined <- rbind(mutate(SPD,data="Ignored"),mutate(SPD_2, data="Imputed"))
+
+ggplot(SPD_Combined, aes(x=Total_Steps)) +
+  geom_histogram(fill = "blue", colour="pink", binwidth=2500) +
+  labs(title="Histogram of number of days by range of steps taken\nby whether missing values (NAs) were Ignored or Imputed\n",
+       x = "\nTotal number of steps taken in a given day", y = "Frequency of days\nfor each steps range") +
+  theme_bw() +
+  facet_grid(. ~ data)
+
+```
+
+<hr>
+
+# Are there differences in activity patterns between weekdays and weekends?
+
+<hr>
+
+#### Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```{r}
+
+Imputed_data <- mutate(Imputed_data, wd = weekdays(as.Date(date, format = "%Y-%m-%d")))
+
+Imputed_data <- mutate(Imputed_data, week_weekend = ifelse(wd=="Saturday","Weekend",ifelse(wd=="Sunday","Weekend","Weekday")))
+
+```
+
+<hr>
+
+####    Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+
+```{r}
+
+MbI <- summarise(group_by(Imputed_data, week_weekend, interval),Mean_Steps=mean(steps))
+
+ggplot(data=MbI, aes(x=interval, y=Mean_Steps, group=1)) +
+  geom_line() +
+labs(title="Average steps taken by time intervals\n",
+     x = "\nTime intervals", y = "Average steps taken\nfor all days") +
+     facet_grid(week_weekend ~ .) +
+  theme_bw()
+
+```
+
+
