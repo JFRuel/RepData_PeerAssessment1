@@ -50,7 +50,7 @@ print(xtable(SPD, caption="<b>Total</b> number of steps taken per day"), type="h
 ```
 
 <!-- html table generated in R 3.1.3 by xtable 1.7-4 package -->
-<!-- Thu Jul 16 19:10:42 2015 -->
+<!-- Thu Jul 16 19:21:36 2015 -->
 <table border=1>
 <caption align="top"> <b>Total</b> number of steps taken per day </caption>
 <tr> <th>  </th> <th> date </th> <th> Total_Steps </th>  </tr>
@@ -194,6 +194,8 @@ The number of rows with NA values in the activities dataset is: <b>2304</b>
 
 #### Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
+The strategy that I have used is to replace the missing values (NAs) with the average accross all days for that interval.  For example, interval "5" that has an "NA" will recieve the average of all the other interval "5".
+
 #### Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 
@@ -204,7 +206,7 @@ The number of rows with NA values in the activities dataset is: <b>2304</b>
 # Reorder the dataset by date/interval
   Imputed_data <- Imputed_data[with(Imputed_data, order(date, interval)), ]
 
-# Impute averate where steps = NA
+# Impute average where steps = NA and rounds up the number to get an integer (no fractions of steps)
   Imputed_data <- mutate(Imputed_data, steps = round(ifelse(is.na(steps),Mean_Steps,steps)),0)
 
 # Drops unwanted columns

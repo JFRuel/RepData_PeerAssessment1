@@ -101,7 +101,7 @@ SPD &lt;- summarise(group_by(filter(activities,steps != &quot;NA&quot;),date),To
 #Use the xtable library to create an html table with all the results
 print(xtable(SPD, caption=&quot;&lt;b&gt;Total&lt;/b&gt; number of steps taken per day&quot;), type=&quot;html&quot;, caption.placement=&quot;top&quot;)</code></pre>
 <!-- html table generated in R 3.1.3 by xtable 1.7-4 package -->
-<!-- Thu Jul 16 19:10:42 2015 -->
+<!-- Thu Jul 16 19:21:36 2015 -->
 <table border="1">
 <caption align="top">
 <b>Total</b> number of steps taken per day
@@ -756,6 +756,7 @@ labs(title=&quot;Average steps taken by time intervals\n&quot;,
 </div>
 <div id="devise-a-strategy-for-filling-in-all-of-the-missing-values-in-the-dataset.-the-strategy-does-not-need-to-be-sophisticated.-for-example-you-could-use-the-meanmedian-for-that-day-or-the-mean-for-that-5-minute-interval-etc." class="section level4">
 <h4>Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.</h4>
+<p>The strategy that I have used is to replace the missing values (NAs) with the average accross all days for that interval. For example, interval “5” that has an “NA” will recieve the average of all the other interval “5”.</p>
 </div>
 <div id="create-a-new-dataset-that-is-equal-to-the-original-dataset-but-with-the-missing-data-filled-in." class="section level4">
 <h4>Create a new dataset that is equal to the original dataset but with the missing data filled in.</h4>
@@ -765,7 +766,7 @@ labs(title=&quot;Average steps taken by time intervals\n&quot;,
 # Reorder the dataset by date/interval
   Imputed_data &lt;- Imputed_data[with(Imputed_data, order(date, interval)), ]
 
-# Impute averate where steps = NA
+# Impute average where steps = NA and rounds up the number to get an integer (no fractions of steps)
   Imputed_data &lt;- mutate(Imputed_data, steps = round(ifelse(is.na(steps),Mean_Steps,steps)),0)
 
 # Drops unwanted columns
