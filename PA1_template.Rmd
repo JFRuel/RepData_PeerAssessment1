@@ -1,4 +1,5 @@
 
+
 ---
 title: "Reproductible Research Course - Project 1"
 date: "Wednesday, July 15, 2015"
@@ -12,16 +13,15 @@ This project answers questions from Peer Assessment asignment #1, of the reprodu
 
 <hr>
 
-## Loading and preprocessing the data
+## 1. Loading and preprocessing the data
 
 <hr>
-#### Load the data (i.e. read.csv()) and process/transform the data (if necessary) into a format suitable for your analysis
+
+#### 1.1 Load the data (i.e. read.csv()) and process/transform the data (if necessary) into a format suitable for your analysis
 
 The code below will load all of the libraries required by this project, handle some global formatting issues and finally load the dataset.
 
 ```{r, message=FALSE}
-## Setting the working directory
-setwd("C:/Users/jfrue_000.MAISON/R/Course5/RepData_PeerAssessment1")
 
 ## Setting up the library and folder used in the assignment
 library(dplyr)
@@ -37,12 +37,14 @@ activities <- tbl_df(read.csv("activity.csv"))
 
 <hr>
 
-## What is mean total number of steps taken per day?
+## 2. What is mean total number of steps taken per day?
 
 <hr>
 For this part of the assignment, you can ignore the missing values in the dataset.
 
-#### Calculate the total number of steps taken per day
+<hr>
+
+#### 2.1 Calculate the total number of steps taken per day
 
 ```{r, results='asis'}
 # Creates the summary by date, and filters out the "NA"s
@@ -51,27 +53,30 @@ SPD <- summarise(group_by(filter(activities,steps != "NA"),date),Total_Steps=sum
 #Use the xtable library to create an html table with all the results
 print(xtable(SPD, caption="<b>Total</b> number of steps taken per day"), type="html", caption.placement="top")
 ```
-<br><br>
 
-#### Make a histogram of the total number of steps taken each day
+<hr>
+
+
+#### 2.2 Make a histogram of the total number of steps taken each day
 
 ```{r}
-ggplot(SPD, aes(x=Total_Steps)) +
-  geom_histogram(fill = "blue", colour="pink", binwidth=2500) +
+ggplot(SPD, aes(x=Total_Steps, fill = ..count..)) +
+  geom_histogram(binwidth=2500) +
   labs(title="Histogram of number of days by range of steps taken\n",
-       x = "\nTotal number of steps taken in a given day", y = "Frequency of days\nfor each steps range") +
-  theme_bw()
+       x = "\nTotal number of steps taken in a given day", y = "Frequency of days\nfor each steps range")  +
+  scale_fill_gradient("Count", low = "green", high = "red")
 
 ```
 
-#### Calculate and report the mean and median of the total number of steps taken per day
+<hr>
+
+#### 2.3 Calculate and report the mean and median of the total number of steps taken per day
 
 ```{r}
 # creates the mean and median variables to be
 # inserted in text using the `R [...]` function
 mean_SPD <- mean(SPD$Total_Steps)
 Median_SPD <- median(SPD$Total_Steps)
-
 
 ```
 
@@ -81,13 +86,13 @@ The <b>median</b> of the total number of steps per day is <b>`r Median_SPD`</b>
 
 <hr>
 
-## What is the average daily activity pattern?
+## 3. What is the average daily activity pattern?
 
 <hr>
 
-#### Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+#### 3.1 Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-After consulting the forum discussions, I interpret this question as asking to do the average of number of steps, accross all days, of each of the individual intervals. 
+After consulting the forum discussions, I interpret this question as asking to do the average of number of steps, accross all days, of each of the individual intervals.
 
 ```{r}
 
@@ -103,11 +108,9 @@ labs(title="Average steps taken by time intervals\n",
 
 ```
 
+<hr>
 
-
-
-
-#### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+#### 3.2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 ```{r}
 Max_int <- filter(MbI, Mean_Steps == max(MbI$Mean_Steps))
@@ -118,13 +121,15 @@ The interval with the highest average number of steps is interval number: <b>`r 
 
 <hr>
 
-# Imputing missing values
+## 4. Imputing missing values
 
 <hr>
 
 Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
-#### Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+<hr>
+
+#### 4.1 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
 ```{r}
 NA_data <- count(filter(activities, is.na(steps)))
@@ -135,11 +140,13 @@ The number of rows with NA values in the activities dataset is: <b>`r NA_data`</
 
 <hr>
 
-#### Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+#### 4.2 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
 The strategy that I have used is to replace the missing values (NAs) with the average accross all days for that interval.  For example, interval "5" that has an "NA" will recieve the average of all the other interval "5".
 
-#### Create a new dataset that is equal to the original dataset but with the missing data filled in.
+<hr>
+
+#### 4.3 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 ```{r}
 
@@ -160,23 +167,27 @@ The strategy that I have used is to replace the missing values (NAs) with the av
 
 <hr>
 
-#### Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.
+#### 4.4 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.
 
 Calculate the total number of steps taken per day
 
 ```{r, results='asis'}
 SPD_2 <- summarise(group_by(Imputed_data,date),Total_Steps=sum(steps))
+
+#Use the xtable library to create an html table with all the results
+print(xtable(SPD_2, caption="<b>Total</b> number of steps taken per day"), type="html", caption.placement="top")
+
 ```
 <br><br>
 
 Make a histogram of the total number of steps taken each day
 
 ```{r}
-ggplot(SPD_2, aes(x=Total_Steps)) +
-  geom_histogram(fill = "blue", colour="pink", binwidth=2500) +
+ggplot(SPD_2, aes(x=Total_Steps, fill = ..count..)) +
+  geom_histogram(binwidth=2500) +
   labs(title="Histogram of number of days by range of steps taken\n",
        x = "\nTotal number of steps taken in a given day", y = "Frequency of days\nfor each steps range") +
-  theme_bw()
+  scale_fill_gradient("Count", low = "green", high = "red")
 
 ```
 
@@ -196,7 +207,7 @@ The <b>median</b> of the total number of steps per day with imputed values is <b
 
 <hr>
 
-#### Do these values differ from the estimates from the first part of the assignment?
+#### 4.5 Do these values differ from the estimates from the first part of the assignment?
 
 The values differ slightly, with results from "imputed" dataset showing lower values.
 
@@ -212,9 +223,9 @@ The <b>median</b> of the total number of steps:
 
 <hr>
 
-#### What is the impact of imputing missing data on the estimates of the total daily number of steps?
+#### 4.6 What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-The Facet plot below shows that the impact is an increase of the number of days with the average number of steps, with little changes otherwise. 
+The Facet plot below shows that the impact is an increase of the number of days with the average number of steps, with little changes otherwise.
 
 This is the expected result, given that I imputed the average number of steps to missing values.
 
@@ -226,22 +237,22 @@ This is the expected result, given that I imputed the average number of steps to
 # the two and allow for creating a facet grid in ggplot
 SPD_Combined <- rbind(mutate(SPD,data="Ignored"),mutate(SPD_2, data="Imputed"))
 
-ggplot(SPD_Combined, aes(x=Total_Steps)) +
-  geom_histogram(fill = "blue", colour="pink", binwidth=2500) +
+ggplot(SPD_Combined, aes(x=Total_Steps, fill = ..count..)) +
+  geom_histogram(binwidth=2500) +
   labs(title="Histogram of number of days by range of steps taken\nby whether missing values (NAs) were Ignored or Imputed\n",
        x = "\nTotal number of steps taken in a given day", y = "Frequency of days\nfor each steps range") +
-  theme_bw() +
-  facet_grid(. ~ data)
+    facet_grid(. ~ data) +
+  scale_fill_gradient("Count", low = "green", high = "red")
 
 ```
 
 <hr>
 
-# Are there differences in activity patterns between weekdays and weekends?
+## 5. Are there differences in activity patterns between weekdays and weekends?
 
 <hr>
 
-#### Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+#### 5.1 Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
 ```{r}
 
@@ -253,7 +264,10 @@ Imputed_data <- mutate(Imputed_data, week_weekend = ifelse(wd=="Saturday","Weeke
 
 <hr>
 
-####    Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+#### 5.2 Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+
+As we can see below, more steps are taken early in the day during weekdays.  Steps seems to be (somewhat) more evenly distributed through the day during weekends.
+
 
 ```{r}
 
@@ -267,5 +281,4 @@ labs(title="Average steps taken by time intervals\n",
   theme_bw()
 
 ```
-
 
